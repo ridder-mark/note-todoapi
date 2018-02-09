@@ -3,19 +3,11 @@ const port = process.env.PORT || 3000;
 var express = require('express');
 var bodyParser = require('body-parser');
 
-var {
-  mongoose
-} = require('./db/mongoose');
-var {
-  Todo
-} = require('./models/todo');
-var {
-  User
-} = require('./models/user');
+var {mongoose} = require('./db/mongoose');
+var {Todo} = require('./models/todo');
+var {User} = require('./models/user');
 
-const {
-  ObjectID
-} = require('mongodb');
+const {ObjectID} = require('mongodb');
 
 
 var app = express();
@@ -36,9 +28,7 @@ app.post('/todos', (req, res) => {
 
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
-    res.send({
-      todos
-    });
+    res.status(200).send({todos});
   }, (e) => {
     res.status(400).send(e);
   });
@@ -61,15 +51,31 @@ app.get('/todos/:id', (req, res) => {
       return res.status(404).send("Todo not found");
     }
 
-    res.status(200).send({
-      todo
-    });
+    res.status(200).send({todo});
 
 
   }).catch((e) => {
-    res.status(400).send("ID not found");
+    res.status(400).send(e);
   });
 
+});
+
+app.delete('/todos/:id', (req, res) => {
+
+  var id = req.params.id;
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send("Invalid ID");
+  }
+
+  Todo.findByIdAndRemove(id).then((todo) => {
+    if (!todo) {
+      return res.status(404).send('Todo not found!');
+    }
+    res.status(200).send({'message':'todo deleted','todo':todo});
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
 });
 
 
