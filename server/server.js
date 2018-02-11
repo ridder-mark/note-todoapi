@@ -77,7 +77,10 @@ app.delete('/todos/:id', (req, res) => {
   });
 });
 
+
+
 app.patch('/todos/:id', (req,res) => {
+
 var id = req.params.id;
 var body = _.pick(req.body, ['text','completed']);
 
@@ -93,7 +96,7 @@ if(_.isBoolean(body.completed) && body.completed) {
 }
 
 
-Todo.findByIdAndUpdate(id, {$set: {body:body}}, {new: true}).then((todo) => {
+Todo.findByIdAndUpdate(id, {$set: body }, {new: true}).then((todo) => {
 
   if(!todo){
     return res.status(404).send('Todo ID not found');
