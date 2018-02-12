@@ -3,11 +3,19 @@ require('./config/config');
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
-const {ObjectID} = require('mongodb');
+const {
+  ObjectID
+} = require('mongodb');
 
-var {mongoose} = require('./db/mongoose');
-var {Todo} = require('./models/todo');
-var {User} = require('./models/user');
+var {
+  mongoose
+} = require('./db/mongoose');
+var {
+  Todo
+} = require('./models/todo');
+var {
+  User
+} = require('./models/user');
 
 var app = express();
 const port = process.env.PORT || 3000;
@@ -26,9 +34,12 @@ app.post('/todos', (req, res) => {
   });
 });
 
+
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
-    res.status(200).send({todos});
+    res.status(200).send({
+      todos
+    });
   }, (e) => {
     res.status(400).send(e);
   });
@@ -51,7 +62,9 @@ app.get('/todos/:id', (req, res) => {
       return res.status(404).send("Todo not found");
     }
 
-    res.status(200).send({todo});
+    res.status(200).send({
+      todo
+    });
 
 
   }).catch((e) => {
@@ -72,7 +85,10 @@ app.delete('/todos/:id', (req, res) => {
     if (!todo) {
       return res.status(404).send('Todo ID not found!');
     }
-    res.status(200).send({'message':'todo deleted','todo':todo});
+    res.status(200).send({
+      'message': 'todo deleted',
+      'todo': todo
+    });
   }).catch((e) => {
     res.status(400).send(e);
   });
@@ -80,36 +96,70 @@ app.delete('/todos/:id', (req, res) => {
 
 
 
-app.patch('/todos/:id', (req,res) => {
+app.patch('/todos/:id', (req, res) => {
 
-var id = req.params.id;
-var body = _.pick(req.body, ['text','completed']);
+  var id = req.params.id;
+  var body = _.pick(req.body, ['text', 'completed']);
 
-if (!ObjectID.isValid(id)) {
-  return res.status(404).send('Invalid ID');
-}
-
-if(_.isBoolean(body.completed) && body.completed) {
-  body.completedAt = new Date().getTime();
-} else {
-  body.completed = false;
-  body.completedAt = null;
-}
-
-
-Todo.findByIdAndUpdate(id, {$set: body }, {new: true}).then((todo) => {
-
-  if(!todo){
-    return res.status(404).send('Todo ID not found');
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send('Invalid ID');
   }
 
-  res.send({'message': 'Todo Updated',todo});
+  if (_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null;
+  }
 
-}).catch((e) => {
-  res.status(400).send(e);
-})
+
+  Todo.findByIdAndUpdate(id, {
+    $set: body
+  }, {
+    new: true
+  }).then((todo) => {
+
+    if (!todo) {
+      return res.status(404).send('Todo ID not found');
+    }
+
+    res.send({
+      'message': 'Todo Updated',
+      todo
+    });
+
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
 
 });
+
+// POST /users
+
+app.post('/users', (req, res) => {
+var body = _.pick(req.body, ['email', 'password']);
+
+
+  var user = new User({
+    email: body.email,
+    password:body.password
+  });
+
+if(!user.validate){
+  return res.send('Invalid Email');
+}
+
+if(user.password.length < 6) {
+  return res.send('Password needs to have atleast 6 characters')
+}
+
+  user.save().then((doc) => {
+    res.send(doc);
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
 
 
 app.listen(port, () => {
