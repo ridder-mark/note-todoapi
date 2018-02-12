@@ -17,14 +17,14 @@
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "lodash": "^4.17.5",
-    "mongodb": "^2.2.33",
-    "mongoose": "^4.13.7",
+    "mongodb": "^2.2.34",
+    "mongoose": "^4.13.11",
     "validator": "^9.4.0"
   },
   "devDependencies": {
-    "expect": "^22.0.3",
-    "mocha": "^4.0.1",
-    "nodemon": "^1.14.3",
+    "expect": "^22.2.2",
+    "mocha": "^4.1.0",
+    "nodemon": "^1.14.12",
     "supertest": "^3.0.0"
   }
 }
