@@ -4,6 +4,8 @@ const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
+const bcrypt = require('bcryptjs');
+
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
@@ -14,6 +16,8 @@ var app = express();
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
+
+// API routes
 
 app.post('/todos', (req, res) => {
   var todo = new Todo({
@@ -134,6 +138,7 @@ app.post('/users', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
   var user = new User(body);
 
+  console.log(user);
 
   user.save().then(()=> {
     return user.generateAuthToken();
@@ -150,6 +155,45 @@ app.get('/users/me', authenticate, (req, res) => {
 res.send(req.user);
 
 });
+
+
+
+app.post('/users/login', (req,res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password)
+  .then((user) => {
+    user.generateAuthToken()
+    .then((token) => {
+    res.header('x-auth', token).send(user);
+
+    });
+  })
+  .catch((e) => {
+    res.status(400).send();
+  });
+});
+
+
+// UserSchema.pre('save', function (next) {
+//   var user = this;
+//
+//   if(user.isModified('password')) {
+//
+//     bcrypt.genSalt(10, (err, salt) => {
+//       bcrypt.hash(user.password,salt, (err, hash) => {
+//         user.password = hash;
+//         next();
+//
+//       });
+//     });
+//
+//   } else { next();}
+// });
+
+
+
+
 
 app.listen(port, () => {
   console.log('Started on port ${port}');
